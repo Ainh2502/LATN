@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Brand"
+ADD COLUMN IF NOT EXISTS "description" TEXT,
+ADD COLUMN IF NOT EXISTS "email" TEXT,
+ADD COLUMN IF NOT EXISTS "phone" TEXT;

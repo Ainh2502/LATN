@@ -1,0 +1,48 @@
+# Cài các gói cần thiết
+npm install ts-node bcryptjs
+
+# Generate Prisma Client
+npx prisma generate
+
+# Nếu chưa migrate thì chạy:
+npx prisma migrate dev --name init
+
+# Chạy seed
+npm run seed
+
+npx prisma migrate reset
+# hoặc nếu DB đã có sẵn:
+npm run seed
+
+npx prisma studio
+
+docker compose up -d
+docker ps
+npm install
+
+npm run start:dev
+
+{
+  "email": "aianh@gmail.com",
+  "password": "123456"
+}
+npm run dev
+
+cd web-frontend-mui
+npm install @vitejs/plugin-react --save-dev
+npm run dev:all
+npm run build
+🚀 Server is running on http://localhost:3000
+📘 Swagger: http://localhost:3000/docs
+
+[0] 🚀 Server is running on http://localhost:3000
+[1] Prisma Studio is up on http://localhost:5555
+[2] Frontend running on http://localhost:5173
+http://localhost:5174/
+
+/// → đặt BASE_URL = ipconfig
+npx ts-node prisma/spmau.ts
+npx ts-node prisma/donmau.ts
+npx ts-node prisma/clear.ts
+npx ts-node prisma/updateShipment.ts
+

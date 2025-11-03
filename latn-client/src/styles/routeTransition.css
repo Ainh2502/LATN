@@ -1,0 +1,30 @@
+/* 🎞️ Hiệu ứng chuyển trang 2 pha: fade-out → fade-in */
+.route-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+/* trạng thái ban đầu khi trang mới mount */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* khi đã active */
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+/* khi rời khỏi */
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-15px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}

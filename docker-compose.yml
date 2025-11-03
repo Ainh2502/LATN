@@ -1,0 +1,113 @@
+version: "3.9"
+
+services:
+  # =======================
+  # 🐘 PostgreSQL Database
+  # =======================
+  db:
+    image: postgres:16
+    container_name: latn-db
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [latn_net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # =======================
+  # 🧠 Redis Cache
+  # =======================
+  redis:
+    image: redis:7-alpine
+    container_name: latn-redis
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks: [latn_net]
+
+  # =======================
+  # 📦 MinIO Object Storage
+  # =======================
+  minio:
+    image: minio/minio
+    container_name: latn-minio
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio:/data
+    networks: [latn_net]
+
+  # =======================
+  # ⚙️ NestJS Backend API
+  # =======================
+  backend:
+    build: ./latn-backend
+    container_name: latn-backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    networks: [latn_net]
+
+  # =======================
+  # 🧭 LATN Admin Dashboard (React + MUI)
+  # =======================
+  admin:
+    build: ./latn-admin
+    container_name: latn-admin
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks: [latn_net]
+
+  # =======================
+  # 🛍️ LATN Client Website (React + MUI)
+  # =======================
+  client:
+    build: ./latn-client
+    container_name: latn-client
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+    networks: [latn_net]
+
+# =======================
+# 🔗 Shared Network & Volumes
+# =======================
+networks:
+  latn_net:
+
+volumes:
+  pgdata:
+  minio:

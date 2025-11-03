@@ -1,0 +1,8 @@
+
+node_modules
+dist
+.env
+*.log
+.prisma
+.idea
+.DS_Store
