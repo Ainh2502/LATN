@@ -15,9 +15,22 @@ if (!fs.existsSync(uploadDir)) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ Bật CORS toàn cục
+  // ✅ Bật CORS cho toàn hệ thống (Admin + Client + Mobile + EC2)
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://192.168.102.67:5173','http://localhost:5175','http://localhost:5174'],
+    origin: [
+      // Local development
+      'http://localhost:5173', // Admin local
+      'http://localhost:5174', // Client local
+      'http://localhost:5175', // Mobile web local
+      'http://192.168.102.67:5173',
+
+ 
+    
+	// 🌎 Production domains (EC2)
+    'https://latn.site',        // Client live
+    'https://admin.latn.site',  // Admin live
+    'https://api.latn.site',   // 🌎 Production domains (EC2)
+    ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -25,43 +38,39 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
   });
 
-  // ✅ Middleware thủ công xử lý OPTIONS (tránh 404 preflight)
+  // ✅ Middleware thủ công xử lý preflight OPTIONS
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'OPTIONS') {
       console.log('🔥 OPTIONS request received for', req.url);
       res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-      res.header(
-        'Access-Control-Allow-Methods',
-        'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-      );
+      res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
       res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       return res.sendStatus(204);
     }
     next();
   });
 
-  // ✅ Validation pipes (loại bỏ field dư thừa, tự transform DTO)
+  // ✅ Validation pipes (lọc field dư, tự transform DTO)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // ✅ Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('LATN Web Admin API')
     .setDescription(
-      '📘 API tài liệu hệ thống quản trị LATN – bao gồm các module: auth, users, products, orders, promotions, analytics, v.v.',
+      '📘 API tài liệu hệ thống LATN – bao gồm các module: Auth, Users, Products, Orders, Promotions, Analytics, v.v.',
     )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
-      persistAuthorization: true, // 🔐 Giữ token sau reload
-      docExpansion: 'list',       // 📂 Mở sẵn tất cả các nhóm
-      tagsSorter: 'alpha',        // 🔤 Sắp xếp tag theo alphabet
-      operationsSorter: 'method', // ⚙️ Sắp xếp endpoint theo method
-      defaultModelsExpandDepth: -1, // Ẩn phần schema model bên dưới
+      persistAuthorization: true,
+      docExpansion: 'list',
+      tagsSorter: 'alpha',
+      operationsSorter: 'method',
+      defaultModelsExpandDepth: -1,
     },
     customSiteTitle: 'LATN API Docs',
     customCss: `
@@ -71,7 +80,7 @@ async function bootstrap() {
     `,
   });
 
-  // ✅ Lắng nghe trên tất cả địa chỉ (phục vụ thiết bị khác trong LAN)
+  // ✅ Lắng nghe tất cả địa chỉ (để EC2 hoặc LAN truy cập được)
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 

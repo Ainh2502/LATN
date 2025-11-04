@@ -1,18 +1,35 @@
-import axios from 'axios';
+import axios from "axios";
 
+// ⚙️ Ưu tiên biến môi trường, fallback về API chính thức trên EC2
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  headers: { 'Content-Type': 'application/json' },
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://api.latn.site", // ✅ Dùng domain HTTPS chính thức (có SSL)
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true, // Cho phép gửi cookie/token cross-domain
 });
 
-// Tự gắn token từ localStorage trước mỗi request
+// 🔐 Tự động gắn token từ localStorage vào mỗi request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers = config.headers || {};
-    (config.headers as any).Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+// 🚫 Nếu token hết hạn (401) → tự logout
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("⚠️ Token hết hạn hoặc không hợp lệ, tự động đăng xuất.");
+      localStorage.removeItem("token");
+      window.location.href = "/login"; // điều hướng về trang đăng nhập
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

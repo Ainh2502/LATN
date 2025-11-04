@@ -25,26 +25,24 @@ services:
       retries: 5
 
   # =======================
-  # 🧠 Redis Cache
+  # ⚡ Redis Cache
   # =======================
   redis:
     image: redis:7-alpine
     container_name: latn-redis
     restart: unless-stopped
-    env_file: .env
     ports:
       - "${REDIS_PORT:-6379}:6379"
     networks: [latn_net]
 
   # =======================
-  # 📦 MinIO Object Storage
+  # 🪣 MinIO Object Storage
   # =======================
   minio:
     image: minio/minio
     container_name: latn-minio
     command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
     restart: unless-stopped
-    env_file: .env
     ports:
       - "${MINIO_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
@@ -59,7 +57,8 @@ services:
   # ⚙️ NestJS Backend API
   # =======================
   backend:
-    build: ./latn-backend
+    build:
+      context: ./latn-backend
     container_name: latn-backend
     restart: unless-stopped
     env_file: .env
@@ -75,10 +74,11 @@ services:
     networks: [latn_net]
 
   # =======================
-  # 🧭 LATN Admin Dashboard (React + MUI)
+  # 🧭 LATN Admin Dashboard (React)
   # =======================
   admin:
-    build: ./latn-admin
+    build:
+      context: ./latn-admin
     container_name: latn-admin
     restart: unless-stopped
     env_file: .env
@@ -89,10 +89,11 @@ services:
     networks: [latn_net]
 
   # =======================
-  # 🛍️ LATN Client Website (React + MUI)
+  # 🛍️ LATN Client Website (React)
   # =======================
   client:
-    build: ./latn-client
+    build:
+      context: ./latn-client
     container_name: latn-client
     restart: unless-stopped
     env_file: .env
@@ -111,3 +112,4 @@ networks:
 volumes:
   pgdata:
   minio:
+
