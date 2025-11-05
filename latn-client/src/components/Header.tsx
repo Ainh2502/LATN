@@ -13,7 +13,7 @@ import {
 import ShoppingBagOutlined from "@mui/icons-material/ShoppingBagOutlined";
 import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import SearchBar from "./SearchBar";
@@ -23,6 +23,7 @@ export default function Header() {
   const nav = useNavigate();
   const loc = useLocation();
   const { user, logout } = useAuth();
+  const token = localStorage.getItem("token");
 
   // 🧭 Xác định trang hiện tại
   const isActive = (path: string) => loc.pathname === path;
@@ -49,15 +50,23 @@ export default function Header() {
   };
 
   const handleCloseMenu = () => {
-    closeTimeout = setTimeout(() => {
-      setAnchorElMenu(null);
-    }, 300);
+    closeTimeout = setTimeout(() => setAnchorElMenu(null), 300);
   };
 
   // 🧭 Reset filters khi click "Sản phẩm"
   const handleGoProducts = () => {
     nav("/products");
     window.dispatchEvent(new Event("latn:resetFilters"));
+  };
+
+  // === Khi user chưa đăng nhập và bấm Cart/Wishlist ===
+  const handleRequireLogin = (path: string) => {
+    if (!token) {
+      localStorage.setItem("redirectAfterLogin", path);
+      nav("/login");
+    } else {
+      nav(path);
+    }
   };
 
   return (
@@ -128,9 +137,7 @@ export default function Header() {
                   backgroundColor: "#FFD700",
                   transition: "width 0.25s ease",
                 },
-                "&:hover::after": {
-                  width: "100%",
-                },
+                "&:hover::after": { width: "100%" },
               }}
             >
               Sản phẩm
@@ -145,9 +152,7 @@ export default function Header() {
               modifiers={[{ name: "offset", options: { offset: [0, 10] } }]}
             >
               <Box
-                onMouseEnter={() => {
-                  if (closeTimeout) clearTimeout(closeTimeout);
-                }}
+                onMouseEnter={() => closeTimeout && clearTimeout(closeTimeout)}
                 onMouseLeave={() => setAnchorElMenu(null)}
                 sx={{
                   mt: 1,
@@ -161,7 +166,7 @@ export default function Header() {
               </Box>
             </Popper>
 
-            {/* 🧩 Các mục còn lại */}
+            {/* 🧩 Các mục khác */}
             {[
               { path: "/new-products", label: "Hàng mới" },
               { path: "/sale", label: "Sale" },
@@ -177,7 +182,6 @@ export default function Header() {
                   fontSize: isActive(item.path) ? 17 : 15,
                   color: "#FFD700",
                   cursor: "pointer",
-                  textTransform: "none",
                   transition: "all 0.25s ease",
                   "&::after": {
                     content: '""',
@@ -189,9 +193,7 @@ export default function Header() {
                     backgroundColor: "#FFD700",
                     transition: "width 0.25s ease",
                   },
-                  "&:hover::after": {
-                    width: "100%",
-                  },
+                  "&:hover::after": { width: "100%" },
                 }}
               >
                 {item.label}
@@ -260,7 +262,7 @@ export default function Header() {
           {/* ❤️ Wishlist */}
           <Tooltip title="Danh sách yêu thích">
             <IconButton
-              onClick={() => nav(user ? "/wishlist" : "/login")}
+              onClick={() => handleRequireLogin("/wishlist")}
               sx={{
                 color: "#FFD700",
                 "&:hover": { color: "#FFCA28" },
@@ -272,7 +274,7 @@ export default function Header() {
 
           {/* 🛍 Cart */}
           <IconButton
-            onClick={() => nav("/cart")}
+            onClick={() => handleRequireLogin("/cart")}
             sx={{
               color: "#FFD700",
               "&:hover": { color: "#FFCA28" },

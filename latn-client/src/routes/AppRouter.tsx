@@ -14,6 +14,7 @@ import { CartProvider } from "../contexts/CartContext";
 import ProtectedRoute from "../components/ProtectedRoute";
 import "../styles/routeTransition.css";
 
+// 📦 Import các trang
 import Home from "../pages/Home";
 import ProductList from "../pages/ProductList";
 import ProductDetail from "../pages/ProductDetail";
@@ -45,7 +46,7 @@ function AnimatedRoutes() {
       <TransitionGroup component={null}>
         <CSSTransition
           key={location.pathname}
-          timeout={600} // thời gian trùng với CSS transition
+          timeout={600}
           classNames={{
             enter: "page-enter",
             enterActive: "page-enter-active",
@@ -55,10 +56,10 @@ function AnimatedRoutes() {
           unmountOnExit
         >
           <Routes location={location}>
+            {/* 🌐 Public routes */}
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<ProductList />} />
             <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/new-products" element={<NewProductsPage />} />
@@ -73,8 +74,25 @@ function AnimatedRoutes() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orders/:id" element={<OrderDetailPage />} />
             <Route path="/my-orders" element={<MyOrdersPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/promotions" element={<PromotionsPage />} />
+
+            {/* 🔐 Protected routes (cần đăng nhập) */}
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <Cart />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoute>
+                  <WishlistPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/profile"
               element={
@@ -83,6 +101,8 @@ function AnimatedRoutes() {
                 </ProtectedRoute>
               }
             />
+
+            {/* ⚠️ 404 fallback */}
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>

@@ -32,7 +32,7 @@ export default function Login() {
     setTimeout(() => nav(-1), 300); // back nhẹ nhàng
   };
 
-  // 🧸 animation yeti (placeholder)
+  // 🧸 Animation Yeti (placeholder)
   const svgRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     gsap.fromTo(
@@ -42,18 +42,21 @@ export default function Login() {
     );
   }, []);
 
+  // 🧩 Submit form login
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await login(email, password);
       const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+      // 🔒 Kiểm tra trạng thái tài khoản
       if (user.isActive === false) {
         setDialogMessage("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.");
         setOpenDialog(true);
         localStorage.clear();
         return;
       }
+      // 🔐 Chỉ cho phép CUSTOMER đăng nhập client
       if (user.role !== "CUSTOMER") {
         setDialogMessage("Chỉ tài khoản khách hàng (CUSTOMER) mới được đăng nhập.");
         setOpenDialog(true);
@@ -61,8 +64,15 @@ export default function Login() {
         return;
       }
 
+      // ✅ Nếu có trang được lưu từ trước (Wishlist/Cart)
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
       setOpen(false);
-      nav("/");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        nav(redirectPath);
+      } else {
+        nav("/");
+      }
     } catch (err) {
       setDialogMessage("Email hoặc mật khẩu không hợp lệ.");
       setOpenDialog(true);
@@ -71,6 +81,7 @@ export default function Login() {
 
   return (
     <>
+      {/* 🧱 Form login */}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -88,7 +99,7 @@ export default function Login() {
           },
         }}
       >
-        {/* Nút đóng ❌ */}
+        {/* ❌ Nút đóng */}
         <Box position="absolute" top={10} right={10}>
           <IconButton onClick={handleClose}>
             <Close />
@@ -100,6 +111,7 @@ export default function Login() {
         </DialogTitle>
 
         <DialogContent>
+          {/* Yeti icon / animation */}
           <Box
             ref={svgRef}
             sx={{
@@ -119,7 +131,12 @@ export default function Login() {
             (Yeti ở đây)
           </Box>
 
-          <Box component="form" onSubmit={submit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Form fields */}
+          <Box
+            component="form"
+            onSubmit={submit}
+            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          >
             <TextField
               label="Email hoặc SĐT"
               fullWidth
@@ -144,6 +161,7 @@ export default function Login() {
                 ),
               }}
             />
+
             <Button
               type="submit"
               variant="contained"
@@ -159,6 +177,7 @@ export default function Login() {
               Đăng nhập
             </Button>
 
+            {/* Forgot password / Register */}
             <Typography align="center" sx={{ mt: 1, fontSize: 14 }}>
               <Button
                 variant="text"
@@ -188,7 +207,7 @@ export default function Login() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog cảnh báo */}
+      {/* ⚠️ Dialog cảnh báo */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -203,7 +222,9 @@ export default function Login() {
           },
         }}
       >
-        <DialogTitle sx={{ color: "#FFD700", fontWeight: 900 }}>🔒 THÔNG BÁO</DialogTitle>
+        <DialogTitle sx={{ color: "#FFD700", fontWeight: 900 }}>
+          🔒 THÔNG BÁO
+        </DialogTitle>
         <DialogContent>
           <Typography sx={{ mb: 2 }}>{dialogMessage}</Typography>
         </DialogContent>
