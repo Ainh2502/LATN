@@ -20,16 +20,20 @@ api.interceptors.request.use((config) => {
 });
 
 // 🚫 Nếu token hết hạn (401) → tự logout
+// 🚫 Nếu token hết hạn (401) → tự logout
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       console.warn("⚠️ Token hết hạn hoặc không hợp lệ, tự động đăng xuất.");
       localStorage.removeItem("token");
-      window.location.href = "/login"; // điều hướng về trang đăng nhập
+      localStorage.removeItem("user");
+      // ✅ Điều hướng đúng cho HashRouter
+      window.location.hash = "#/login";
     }
     return Promise.reject(error);
   }
 );
+
 
 export default api;
