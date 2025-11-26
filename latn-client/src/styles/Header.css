@@ -1,0 +1,49 @@
+/* 🌐 Chung cho tất cả NavLink */
+.nav-item {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.25s ease;
+  padding-bottom: 3px;
+}
+
+/* 🌟 Hiệu ứng hover */
+.nav-item:hover {
+  color: #0a1929;
+  text-shadow: 0 0 6px rgba(10, 25, 41, 0.25);
+}
+
+/* 🌈 Thanh underline */
+.nav-item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #0a1929;
+  transition: width 0.25s ease;
+}
+
+/* Hover hoặc đang active thì underline mở rộng */
+.nav-item:hover::after,
+.nav-item.active::after {
+  width: 100%;
+}
+
+/* 🔹 Hai mục nhỏ (About, Contact) */
+.nav-item.small {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.nav-item.small:hover {
+  color: #0a1929;
+  text-shadow: 0 0 4px rgba(10, 25, 41, 0.2);
+}
+
+.nav-item.small.active {
+  color: #0a1929;
+  font-weight: 600;
+}

@@ -1,0 +1,73 @@
+/* 🌐 Hiệu ứng chung cho mọi route */
+.route-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 🌟 Mặc định: fade + slide nhẹ */
+.page-enter {
+  opacity: 0;
+  transform: translateX(40px) scale(0.98);
+  transform-origin: center;
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+.page-exit-active {
+  opacity: 0;
+  transform: translateX(-40px) scale(0.98);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+/* ============================= */
+/* 🎯 Hiệu ứng riêng cho ProductDetail */
+/* ============================= */
+
+/* Khi mở chi tiết → phóng to và fade-in */
+.page-enter[data-page="product-detail"] {
+  transform: scale(0.85) translateY(40px);
+  opacity: 0;
+}
+.page-enter-active[data-page="product-detail"] {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  transition: all 1.1s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Khi quay lại danh sách → thu nhỏ và mờ dần */
+.page-exit[data-page="product-detail"] {
+  transform: scale(1);
+  opacity: 1;
+}
+.page-exit-active[data-page="product-detail"] {
+  transform: scale(0.85);
+  opacity: 0;
+  transition: all 1.1s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* ============================= */
+/* ✨ Bổ sung tinh chỉnh nhẹ */
+/* ============================= */
+
+/* Làm mềm toàn bộ animation */
+.page-enter-active,
+.page-exit-active {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Giảm giật lag ở trình duyệt yếu */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-exit-active {
+    transition-duration: 0.5s !important;
+  }
+}
